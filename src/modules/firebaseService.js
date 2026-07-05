@@ -18,7 +18,7 @@ import {
 
 // Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCB7ohsGNx4YrxfZaDVYpeB3olK08RdgRE",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "benchmarkcp-ea72d.firebaseapp.com",
   projectId: "benchmarkcp-ea72d",
   storageBucket: "benchmarkcp-ea72d.firebasestorage.app",
@@ -82,7 +82,7 @@ export async function submitResult(result, hwInfo) {
       // Benchmark info
       benchmarkId: result.id,
       benchmarkName: result.name,
-      benchmarkIcon: result.icon || '⚡',
+      benchmarkIcon: result.icon || `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
 
       // Performance metrics
       medianMs: Math.round(result.stats.median * 100) / 100,

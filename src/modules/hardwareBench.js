@@ -79,7 +79,7 @@ function renderBenchmarkList() {
   customItem.dataset.id = 'custom';
   customItem.innerHTML = `
     <input type="checkbox" data-bench-id="custom" />
-    <span class="bench-item-icon">✍️</span>
+    <span class="bench-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></span>
     <span class="bench-item-name">Custom Code</span>
     <span class="bench-item-time" id="bench-time-custom"></span>
   `;
@@ -122,7 +122,7 @@ function selectCustom() {
     item.classList.toggle('active', item.dataset.id === 'custom');
   });
 
-  document.getElementById('bench-detail-title').textContent = '✍️ Custom Code';
+  document.getElementById('bench-detail-title').textContent = 'Custom Code';
   document.getElementById('bench-detail-desc').textContent =
     'Write your own benchmark code. You have access to `data` (random integer array) and `size` (array length).';
 
@@ -163,7 +163,7 @@ function getCheckedBenchmarks() {
         checked.push({
           id: 'custom',
           name: 'Custom Code',
-          icon: '✍️',
+          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
           code: previewEditor.getValue(),
           inputSize: 100000,
           iterations: 30,

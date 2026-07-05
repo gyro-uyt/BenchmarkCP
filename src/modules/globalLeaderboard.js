@@ -134,7 +134,7 @@ function renderLeaderboardTable() {
   const tbody = document.getElementById('leaderboard-body');
   
   if (currentLeaderboardEntries.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="lb-empty">No global scores yet. Be the first! 🚀</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="lb-empty">No global scores yet. Be the first!</td></tr>`;
     return;
   }
 
@@ -183,7 +183,7 @@ function getBrowserIcon(browser) {
     case 'Firefox': return '🦊';
     case 'Safari': return '🧭';
     case 'Edge': return '🔵';
-    default: return '🌐';
+    default: return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
   }
 }
 
