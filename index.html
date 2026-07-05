@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BenchmarkCP — Compare code performance side-by-side and benchmark your hardware with preloaded algorithms." />
+  <title>BenchmarkCP — Code Performance Duel & Hardware Benchmark</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Background animated gradient -->
+  <div class="bg-gradient"></div>
+
+  <!-- App Shell -->
+  <div id="app">
+    <!-- Navigation -->
+    <header class="navbar">
+      <div class="navbar-brand">
+        <span class="brand-icon">⚡</span>
+        <h1 class="brand-text">Benchmark<span class="brand-accent">CP</span></h1>
+      </div>
+      <nav class="navbar-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="duel" role="tab" aria-selected="true" id="tab-duel">
+          <span class="tab-icon">⚔️</span>
+          <span class="tab-label">Code Duel</span>
+        </button>
+        <button class="tab-btn" data-tab="hardware" role="tab" aria-selected="false" id="tab-hardware">
+          <span class="tab-icon">🖥️</span>
+          <span class="tab-label">Hardware Bench</span>
+        </button>
+        <button class="tab-btn" data-tab="leaderboard" role="tab" aria-selected="false" id="tab-leaderboard">
+          <span class="tab-icon">🏆</span>
+          <span class="tab-label">Leaderboard</span>
+        </button>
+      </nav>
+      <div class="navbar-info">
+        <span class="info-badge" id="hw-summary"></span>
+      </div>
+    </header>
+
+    <!-- Code Duel Mode -->
+    <main class="mode-panel active" id="panel-duel" role="tabpanel" aria-labelledby="tab-duel">
+      <!-- Controls Bar -->
+      <div class="controls-bar">
+        <div class="control-group">
+          <label class="control-label" for="input-size">Input Size</label>
+          <div class="size-selector" id="input-size">
+            <button class="size-btn" data-size="1000">1K</button>
+            <button class="size-btn active" data-size="10000">10K</button>
+            <button class="size-btn" data-size="100000">100K</button>
+            <button class="size-btn" data-size="1000000">1M</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="iterations">Iterations</label>
+          <input type="number" id="iterations" class="control-input" value="50" min="5" max="500" />
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="warmup">Warm-up</label>
+          <input type="number" id="warmup" class="control-input" value="10" min="0" max="50" />
+        </div>
+        <button class="run-btn" id="duel-run-btn">
+          <span class="run-icon">⚔️</span>
+          <span class="run-text">Duel!</span>
+        </button>
+      </div>
+
+      <!-- Editor Panels -->
+      <div class="editors-container">
+        <div class="editor-panel" id="editor-panel-a">
+          <div class="editor-header">
+            <span class="editor-badge badge-a">A</span>
+            <span class="editor-title">Version A</span>
+            <span class="editor-status" id="status-a"></span>
+          </div>
+          <div class="editor-body" id="editor-a"></div>
+        </div>
+        <div class="editor-divider">
+          <span class="divider-label">VS</span>
+        </div>
+        <div class="editor-panel" id="editor-panel-b">
+          <div class="editor-header">
+            <span class="editor-badge badge-b">B</span>
+            <span class="editor-title">Version B</span>
+            <span class="editor-status" id="status-b"></span>
+          </div>
+          <div class="editor-body" id="editor-b"></div>
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="results-panel hidden" id="duel-results">
+        <div class="results-header">
+          <h2 class="results-title">📊 Results</h2>
+          <span class="results-subtitle" id="results-meta"></span>
+        </div>
+        <div class="results-grid">
+          <!-- Winner Card -->
+          <div class="result-card winner-card" id="winner-card">
+            <div class="winner-icon" id="winner-icon">🏆</div>
+            <div class="winner-text" id="winner-text"></div>
+            <div class="winner-detail" id="winner-detail"></div>
+          </div>
+          <!-- Stat Cards -->
+          <div class="result-card stat-card">
+            <div class="stat-label">Version A — Median</div>
+            <div class="stat-value" id="stat-a-median">—</div>
+            <div class="stat-sub" id="stat-a-ops">—</div>
+          </div>
+          <div class="result-card stat-card">
+            <div class="stat-label">Version B — Median</div>
+            <div class="stat-value" id="stat-b-median">—</div>
+            <div class="stat-sub" id="stat-b-ops">—</div>
+          </div>
+          <div class="result-card stat-card">
+            <div class="stat-label">Std Dev A / B</div>
+            <div class="stat-value" id="stat-stddev">—</div>
+            <div class="stat-sub" id="stat-stddev-sub">Lower is more consistent</div>
+          </div>
+        </div>
+        <!-- Chart -->
+        <div class="chart-container">
+          <canvas id="duel-chart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="distribution-chart"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <!-- Hardware Bench Mode -->
+    <main class="mode-panel" id="panel-hardware" role="tabpanel" aria-labelledby="tab-hardware">
+      <!-- Hardware Info Card -->
+      <div class="hw-info-bar" id="hw-info-bar">
+        <div class="hw-info-item">
+          <span class="hw-icon">🔲</span>
+          <span class="hw-label">CPU Cores</span>
+          <span class="hw-value" id="hw-cores">—</span>
+        </div>
+        <div class="hw-info-item">
+          <span class="hw-icon">💾</span>
+          <span class="hw-label">RAM</span>
+          <span class="hw-value" id="hw-ram">—</span>
+        </div>
+        <div class="hw-info-item">
+          <span class="hw-icon">🎮</span>
+          <span class="hw-label">GPU</span>
+          <span class="hw-value" id="hw-gpu">—</span>
+        </div>
+        <div class="hw-info-item">
+          <span class="hw-icon">🌐</span>
+          <span class="hw-label">Browser</span>
+          <span class="hw-value" id="hw-browser">—</span>
+        </div>
+      </div>
+
+      <!-- Benchmark Selection -->
+      <div class="bench-content">
+        <div class="bench-sidebar">
+          <h3 class="sidebar-title">Benchmarks</h3>
+          <div class="bench-list" id="bench-list">
+            <!-- Populated by JS -->
+          </div>
+          <button class="run-btn bench-run-btn" id="hw-run-btn">
+            <span class="run-icon">🚀</span>
+            <span class="run-text">Run Selected</span>
+          </button>
+          <button class="run-btn bench-run-all-btn" id="hw-run-all-btn">
+            <span class="run-icon">🔥</span>
+            <span class="run-text">Run All</span>
+          </button>
+        </div>
+        <div class="bench-main">
+          <!-- Benchmark Detail / Custom Code -->
+          <div class="bench-detail" id="bench-detail">
+            <div class="bench-detail-header">
+              <h3 class="bench-detail-title" id="bench-detail-title">Select a benchmark</h3>
+              <p class="bench-detail-desc" id="bench-detail-desc">Choose a preloaded benchmark from the sidebar or write your own code.</p>
+            </div>
+            <div class="bench-code-preview" id="bench-code-preview"></div>
+          </div>
+          <!-- Hardware Results -->
+          <div class="hw-results hidden" id="hw-results">
+            <h3 class="results-title">🚀 Benchmark Results</h3>
+            <div class="hw-results-list" id="hw-results-list"></div>
+            <div class="chart-container">
+              <canvas id="hw-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Leaderboard Mode -->
+    <main class="mode-panel" id="panel-leaderboard" role="tabpanel" aria-labelledby="tab-leaderboard">
+      <div class="leaderboard-page-wrap">
+        <div class="leaderboard-hero">
+          <h2 class="hero-title">Global Hardware Ranking</h2>
+          <p class="hero-desc">The official BenchmarkCP ranking. Scores are calculated by running the full Global Suite.</p>
+          <button class="run-btn primary-run-btn" id="lb-run-global-btn">
+            <span class="run-icon">🔥</span>
+            <span class="run-text">Run Global Benchmark</span>
+          </button>
+        </div>
+
+        <div class="leaderboard-section" id="leaderboard-section">
+          <div class="leaderboard-header-wrap">
+            <h3 class="results-title" id="leaderboard-title">🏆 Top Scores</h3>
+            <div class="lb-browser-tabs" id="lb-browser-tabs">
+              <button class="lb-tab active" data-browser="all">All</button>
+              <button class="lb-tab" data-browser="Chrome">Chrome</button>
+              <button class="lb-tab" data-browser="Firefox">Firefox</button>
+              <button class="lb-tab" data-browser="Edge">Edge</button>
+              <button class="lb-tab" data-browser="Safari">Safari</button>
+            </div>
+          </div>
+          <div class="leaderboard-table-wrap">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Global Score</th>
+                  <th>Hardware</th>
+                  <th>Browser</th>
+                  <th>GPU</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+                <tr><td colspan="6" class="lb-empty">Loading leaderboard...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Progress Overlay -->
+  <div class="progress-overlay hidden" id="progress-overlay">
+    <div class="progress-modal">
+      <div class="progress-spinner"></div>
+      <div class="progress-text" id="progress-text">Running benchmark...</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="progress-detail" id="progress-detail"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="submit-toast hidden" id="submit-toast"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
