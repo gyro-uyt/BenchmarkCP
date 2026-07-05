@@ -19,7 +19,10 @@ let cachedHwInfo = null;
  */
 export function initHardwareBench(monaco) {
   cachedHwInfo = detectHardware();
+  // Load user-provided CPU name from localStorage
+  cachedHwInfo.cpuName = localStorage.getItem('benchmarkcp_cpuName') || '';
   renderBenchmarkList();
+  renderCpuInput();
   setupEventListeners();
 
   // Create a read-only preview editor
@@ -91,6 +94,41 @@ function renderBenchmarkList() {
 }
 
 /**
+ * Render a CPU name input field inside the hardware info bar.
+ * This lets the user type their CPU model (e.g. "i7-14700HX") since
+ * browsers don't expose the CPU name for privacy reasons.
+ */
+function renderCpuInput() {
+  const hwBar = document.getElementById('hw-info-bar');
+  if (!hwBar) return;
+
+  // Insert a new hw-info-item for CPU Name at the beginning
+  const cpuItem = document.createElement('div');
+  cpuItem.className = 'hw-info-item';
+  cpuItem.innerHTML = `
+    <svg class="hw-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+    <span class="hw-label">CPU Name</span>
+    <input
+      type="text"
+      id="hw-cpu-name"
+      class="hw-cpu-input"
+      placeholder="e.g. i7-14700HX"
+      value="${cachedHwInfo.cpuName || ''}"
+      spellcheck="false"
+    />
+  `;
+  hwBar.insertBefore(cpuItem, hwBar.firstChild);
+
+  // Save on input
+  const input = document.getElementById('hw-cpu-name');
+  input.addEventListener('input', () => {
+    const name = input.value.trim();
+    cachedHwInfo.cpuName = name;
+    localStorage.setItem('benchmarkcp_cpuName', name);
+  });
+}
+
+/**
  * Select a preloaded benchmark and show its code.
  */
 function selectBenchmark(bench) {
@@ -102,7 +140,7 @@ function selectBenchmark(bench) {
   });
 
   // Update detail panel
-  document.getElementById('bench-detail-title').textContent = `${bench.icon} ${bench.name}`;
+  document.getElementById('bench-detail-title').textContent = bench.name;
   document.getElementById('bench-detail-desc').textContent = bench.description;
 
   // Update editor
@@ -163,7 +201,7 @@ function getCheckedBenchmarks() {
         checked.push({
           id: 'custom',
           name: 'Custom Code',
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+          icon: '',
           code: previewEditor.getValue(),
           inputSize: 100000,
           iterations: 30,
@@ -230,7 +268,7 @@ async function executeBenchmarks(benchmarks) {
     const bench = benchmarks[i];
 
     document.getElementById('progress-text').textContent =
-      `Running ${bench.icon} ${bench.name} (${i + 1}/${benchmarks.length})...`;
+      `Running ${bench.name} (${i + 1}/${benchmarks.length})...`;
     document.getElementById('progress-bar').style.width =
       `${(i / benchmarks.length) * 100}%`;
 
